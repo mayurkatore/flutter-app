@@ -45,5 +45,17 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs location access to provide location-based features and tracking.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs location access to provide location-based features and tracking.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs location access to provide location-based features and tracking.</string>
+	
+	<!-- Screen Time permissions -->
+	<key>NSScreenTimeUsageDescription</key>
+	<string>This app needs screen time access to monitor and limit app usage for digital wellness.</string>
 </dict>
 </plist>

@@ -162,7 +162,7 @@ class SocialScreen extends ConsumerWidget {
                 ),
                 Chip(
                   label: Text('${group.members.length} members'),
-                  backgroundColor: colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: colorScheme.primary.withAlpha(25),
                 ),
               ],
             ),
@@ -306,7 +306,7 @@ class SocialScreen extends ConsumerWidget {
   }) {
     return Card(
       color: isCurrentUser
-          ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+          ? Theme.of(context).colorScheme.primary.withAlpha(25)
           : null,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -455,7 +455,7 @@ class SocialScreen extends ConsumerWidget {
             const SizedBox(height: 5),
             LinearProgressIndicator(
               value: progress,
-              backgroundColor: colorScheme.onSurfaceVariant.withOpacity(0.2),
+              backgroundColor: colorScheme.onSurfaceVariant.withAlpha(51),
               valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
             ),
             const SizedBox(height: 5),

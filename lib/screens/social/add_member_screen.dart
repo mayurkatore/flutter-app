@@ -130,7 +130,7 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
                 children: _members.map((member) {
                   return Chip(
                     label: Text(member),
-                    backgroundColor: colorScheme.primary.withOpacity(0.1),
+                    backgroundColor: colorScheme.primary.withAlpha(26),
                     onDeleted: () => _removeMember(member),
                   );
                 }).toList(),

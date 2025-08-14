@@ -37,10 +37,6 @@ final List<AppUsage> _mockAppUsage = [
   ),
 ];
 
-final appUsageProvider = StateNotifierProvider<AppUsageNotifier, List<AppUsage>>((ref) {
-  return AppUsageNotifier();
-});
-
 class AppUsageNotifier extends StateNotifier<List<AppUsage>> {
   AppUsageNotifier() : super(_mockAppUsage);
 
@@ -92,3 +88,7 @@ class AppUsageNotifier extends StateNotifier<List<AppUsage>> {
     state = appUsageList;
   }
 }
+
+final appUsageProvider = StateNotifierProvider<AppUsageNotifier, List<AppUsage>>((ref) {
+  return AppUsageNotifier();
+});

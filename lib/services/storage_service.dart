@@ -9,6 +9,9 @@ class StorageService {
   static const String _goalsKey = 'goals_data';
   static const String _focusSessionsKey = 'focus_sessions_data';
   static const String _userPreferencesKey = 'user_preferences';
+  static const String _locationDataKey = 'location_tracking_data';
+  static const String _geofenceDataKey = 'geofence_data';
+  static const String _screenTimeLimitsKey = 'screen_time_limits';
 
   late SharedPreferences _prefs;
 
@@ -33,7 +36,7 @@ class StorageService {
       Logger.debug('No app usage data found');
       return [];
     }
-    
+
     final data = jsonDecode(jsonString) as List;
     return data.cast<Map<String, dynamic>>();
   }
@@ -53,7 +56,7 @@ class StorageService {
       Logger.debug('No challenges data found');
       return [];
     }
-    
+
     final data = jsonDecode(jsonString) as List;
     return data.cast<Map<String, dynamic>>();
   }
@@ -73,7 +76,7 @@ class StorageService {
       Logger.debug('No journal entries data found');
       return [];
     }
-    
+
     final data = jsonDecode(jsonString) as List;
     return data.cast<Map<String, dynamic>>();
   }
@@ -93,7 +96,7 @@ class StorageService {
       Logger.debug('No goals data found');
       return [];
     }
-    
+
     final data = jsonDecode(jsonString) as List;
     return data.cast<Map<String, dynamic>>();
   }
@@ -113,7 +116,7 @@ class StorageService {
       Logger.debug('No focus sessions data found');
       return [];
     }
-    
+
     final data = jsonDecode(jsonString) as List;
     return data.cast<Map<String, dynamic>>();
   }
@@ -133,8 +136,73 @@ class StorageService {
       Logger.debug('No user preferences found');
       return {};
     }
-    
+
     return jsonDecode(jsonString) as Map<String, dynamic>;
+  }
+
+  // Location data methods
+  Future<void> saveLocationData(List<Map<String, dynamic>> data) async {
+    Logger.debug('Saving location data');
+    final jsonString = jsonEncode(data);
+    await _prefs.setString(_locationDataKey, jsonString);
+    Logger.debug('Location data saved successfully');
+  }
+
+  Future<List<Map<String, dynamic>>> getLocationData() async {
+    Logger.debug('Loading location data');
+    final jsonString = _prefs.getString(_locationDataKey);
+    if (jsonString == null) {
+      Logger.debug('No location data found');
+      return [];
+    }
+
+    final data = jsonDecode(jsonString) as List;
+    return data.cast<Map<String, dynamic>>();
+  }
+
+  // Screen time limits methods
+  Future<void> saveScreenTimeLimits(Map<String, int> limits) async {
+    Logger.debug('Saving screen time limits');
+    final jsonString = jsonEncode(limits);
+    await _prefs.setString(_screenTimeLimitsKey, jsonString);
+    Logger.debug('Screen time limits saved successfully');
+  }
+
+  Future<Map<String, int>> getScreenTimeLimits() async {
+    Logger.debug('Loading screen time limits');
+    final jsonString = _prefs.getString(_screenTimeLimitsKey);
+    if (jsonString == null) {
+      Logger.debug('No screen time limits found');
+      return {};
+    }
+
+    final data = jsonDecode(jsonString) as Map<String, dynamic>;
+    return data.map((key, value) => MapEntry(key, value as int));
+  }
+
+  // Generic data methods
+  Future<void> saveData(String key, dynamic data) async {
+    Logger.debug('Saving data for key: $key');
+    final jsonString = jsonEncode(data);
+    await _prefs.setString(key, jsonString);
+    Logger.debug('Data saved successfully for key: $key');
+  }
+
+  Future<T?> getData<T>(String key) async {
+    Logger.debug('Loading data for key: $key');
+    final jsonString = _prefs.getString(key);
+    if (jsonString == null) {
+      Logger.debug('No data found for key: $key');
+      return null;
+    }
+
+    try {
+      final data = jsonDecode(jsonString);
+      return data as T;
+    } catch (e) {
+      Logger.error('Error decoding data for key $key: $e');
+      return null;
+    }
   }
 
   // Clear all data
@@ -146,6 +214,8 @@ class StorageService {
     await _prefs.remove(_goalsKey);
     await _prefs.remove(_focusSessionsKey);
     await _prefs.remove(_userPreferencesKey);
+    await _prefs.remove(_locationDataKey);
+    await _prefs.remove(_screenTimeLimitsKey);
     Logger.info('All stored data cleared successfully');
   }
 }

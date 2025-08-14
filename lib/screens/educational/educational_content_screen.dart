@@ -21,40 +21,39 @@ class EducationalContentScreen extends ConsumerStatefulWidget {
 
 class _EducationalContentScreenState
     extends ConsumerState<EducationalContentScreen> {
-  // Screen time stats
-  List<AppUsage> _screenTimeStats = [];
   bool _loadingStats = false;
   bool _hasPermission = false;
-
-  // Healthy habits
+  List<AppUsage> _screenTimeStats = [];
   Map<String, int> _appTimeLimits = {};
-  final Map<String, TextEditingController> _timeLimitControllers = {};
-  final List<String> _sampleApps = [
-    'com.instagram.android',
-    'com.facebook.katana',
-    'com.whatsapp',
-    'com.google.android.youtube',
-    'com.netflix.mediaclient',
-  ];
-
-  // Night mode
-  TimeOfDay _bedtime = const TimeOfDay(hour: 21, minute: 0); // 9:00 PM default
+  Map<String, TextEditingController> _timeLimitControllers = {};
+  final ScreenTimeService _screenTimeService = ScreenTimeService();
+  
+  // Bedtime reminder variables
+  TimeOfDay _bedtime = const TimeOfDay(hour: 22, minute: 0);
   bool _reminderEnabled = false;
+
+  final List<String> _sampleApps = [
+    'com.whatsapp',
+    'com.facebook.katana',
+    'com.instagram.android',
+    'com.twitter.android',
+    'com.google.android.youtube',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _initialize();
+    _loadScreenTimeStats();
+    _loadAppTimeLimits();
+    _loadBedtimeSettings();
   }
 
-  Future<void> _initialize() async {
-    if (widget.title == 'Screen Time Statistics') {
-      _loadScreenTimeStats();
-    } else if (widget.title == 'Healthy Phone Habits') {
-      _loadAppTimeLimits();
-    } else if (widget.title == 'Sleep and Technology') {
-      _loadBedtimeSettings();
+  @override
+  void dispose() {
+    for (final controller in _timeLimitControllers.values) {
+      controller.dispose();
     }
+    super.dispose();
   }
 
   Future<void> _loadScreenTimeStats() async {
@@ -64,23 +63,37 @@ class _EducationalContentScreenState
 
     try {
       // Check if we have usage permission
-      bool granted = await ScreenTimeService.requestUsagePermission();
+      bool granted = await _screenTimeService.requestUsagePermission();
       setState(() {
         _hasPermission = granted;
       });
 
       if (_hasPermission) {
         // Get stats for the past 24 hours
-        List<AppUsage> stats =
-            await ScreenTimeService.getDailyScreenTimeStats();
+        Map<String, Duration> stats =
+            await _screenTimeService.getDailyScreenTimeStats();
+
+        // Convert to AppUsage format for display
+        List<AppUsage> appUsageList = stats.entries.map((entry) {
+          return AppUsage(
+            id: entry.key,
+            appName: entry.key,
+            packageName: entry.key,
+            todayUsage: entry.value,
+            weeklyUsage: entry.value,
+            dailyLimit: const Duration(hours: 1),
+            isBlocked: false,
+            lastUsed: DateTime.now(),
+          );
+        }).toList();
 
         // Sort by usage time (descending)
-        stats.sort((a, b) {
+        appUsageList.sort((a, b) {
           return b.todayUsage.compareTo(a.todayUsage);
         });
 
         setState(() {
-          _screenTimeStats = stats;
+          _screenTimeStats = appUsageList;
         });
       }
     } catch (e) {
@@ -94,7 +107,7 @@ class _EducationalContentScreenState
 
   Future<void> _requestScreenTimePermission() async {
     try {
-      bool granted = await ScreenTimeService.requestUsagePermission();
+      bool granted = await _screenTimeService.requestUsagePermission();
       setState(() {
         _hasPermission = granted;
       });
@@ -223,15 +236,6 @@ class _EducationalContentScreenState
   }
 
   @override
-  void dispose() {
-    // Dispose controllers
-    for (final controller in _timeLimitControllers.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -352,7 +356,7 @@ class _EducationalContentScreenState
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
+                color: colorScheme.primary.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(

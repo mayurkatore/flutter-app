@@ -115,7 +115,7 @@ class ChallengesScreen extends ConsumerWidget {
             // Progress bar
             LinearProgressIndicator(
               value: challenge.progressPercentage,
-              backgroundColor: colorScheme.onSurfaceVariant.withOpacity(0.2),
+              backgroundColor: colorScheme.onSurfaceVariant.withAlpha(51),
               valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
             ),
             const SizedBox(height: 5),
@@ -192,7 +192,7 @@ class ChallengesScreen extends ConsumerWidget {
                 challenge.title == 'Early Bird Challenge')
               Container(
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.1),
+                  color: colorScheme.primary.withAlpha(26),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(8.0),

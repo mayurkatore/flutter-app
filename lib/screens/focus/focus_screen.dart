@@ -4,6 +4,7 @@ import '../../providers/focus_provider.dart';
 import '../../models/focus_session.dart';
 import '../../providers/app_usage_provider.dart';
 import '../../models/app_usage.dart';
+import '../../widgets/shared/button_functions.dart';
 import 'screen_time_page.dart';
 
 class FocusScreen extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     setState(() {
       _isRunning = true;
     });
-    
+
     // In a real app, we would use a timer here
     // For now, we'll just simulate the timer
     // Also, we would block the selected apps here
@@ -74,7 +75,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       }
     });
   }
-  
+
   void _blockApps() {
     // In a real app, this would interact with system-level app blocking functionality
     // For now, we'll just update the app usage provider with the blocked apps
@@ -97,11 +98,14 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 const SizedBox(height: 20),
                 const Text('Session Duration:'),
                 Slider(
-                  value: _getDurationForPreset(_selectedPreset).inMinutes.toDouble(),
+                  value: _getDurationForPreset(_selectedPreset)
+                      .inMinutes
+                      .toDouble(),
                   min: 5,
                   max: 120,
                   divisions: 23,
-                  label: '${_getDurationForPreset(_selectedPreset).inMinutes} minutes',
+                  label:
+                      '${_getDurationForPreset(_selectedPreset).inMinutes} minutes',
                   onChanged: (double value) {
                     setState(() {
                       if (_selectedPreset == FocusPreset.custom) {
@@ -115,7 +119,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     });
                   },
                 ),
-                Text('${_getDurationForPreset(_selectedPreset).inMinutes} minutes'),
+                Text(
+                    '${_getDurationForPreset(_selectedPreset).inMinutes} minutes'),
                 const SizedBox(height: 20),
                 const Text('Blocked Apps:'),
                 const SizedBox(height: 10),
@@ -140,18 +145,15 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   Widget build(BuildContext context) {
     final focusSessions = ref.watch(focusProvider);
     final appUsageList = ref.watch(appUsageProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    // Update the app usage list
-    _appUsageList = appUsageList;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Focus Mode'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.settings, color: colorScheme.onSurfaceVariant),
+          AppButtons.iconButton(
+            icon: Icons.settings,
             onPressed: _showSettingsDialog,
+            context: context,
           ),
         ],
       ),
@@ -164,19 +166,19 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               // Timer Section
               _buildTimerSection(context),
               const SizedBox(height: 30),
-              
+
               // Presets Section
               _buildPresetsSection(context),
               const SizedBox(height: 30),
-              
+
               // App Blocker Section
               _buildAppBlockerSection(context),
               const SizedBox(height: 30),
-              
+
               // Recent Sessions
               _buildRecentSessionsSection(focusSessions, context),
               const SizedBox(height: 20),
-              
+
               // Screen Time Button
               _buildScreenTimeButton(context),
               const SizedBox(height: 20), // Add some bottom padding
@@ -189,7 +191,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   Widget _buildTimerSection(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
     return Center(
       child: Column(
         children: [
@@ -201,10 +202,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 width: 200,
                 height: 200,
                 child: CircularProgressIndicator(
-                  value: _timeLeft.inSeconds / _getDurationForPreset(_selectedPreset).inSeconds,
+                  value: _timeLeft.inSeconds /
+                      _getDurationForPreset(_selectedPreset).inSeconds,
                   strokeWidth: 10,
-                  backgroundColor: colorScheme.onSurfaceVariant.withOpacity(0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                  backgroundColor:
+                      colorScheme.onSurfaceVariant.withAlpha(51),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(colorScheme.primary),
                 ),
               ),
               Column(
@@ -212,7 +216,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 children: [
                   Text(
                     '${_timeLeft.inMinutes}:${(_timeLeft.inSeconds % 60).toString().padLeft(2, '0')}',
-                    style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 36, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -224,31 +229,21 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             ],
           ),
           const SizedBox(height: 30),
-          
+
           // Control buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: _isRunning ? _pauseTimer : _startTimer,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: Text(_isRunning ? 'Pause' : 'Start'),
+              AppButtons.timerControlButton(
+                context: context,
+                isRunning: _isRunning,
+                onStartPause: _isRunning ? _pauseTimer : _startTimer,
               ),
               const SizedBox(width: 20),
-              OutlinedButton(
+              AppButtons.secondaryButton(
+                context: context,
+                text: 'Reset',
                 onPressed: _resetTimer,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text('Reset'),
               ),
             ],
           ),
@@ -258,8 +253,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   }
 
   Widget _buildPresetsSection(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -272,15 +265,15 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           spacing: 10,
           runSpacing: 10,
           children: FocusPreset.values.map((preset) {
-            return ChoiceChip(
-              label: Text(preset.name.toUpperCase()),
-              selected: _selectedPreset == preset,
-              selectedColor: colorScheme.primary.withOpacity(0.2),
+            return AppButtons.presetChip(
+              label: preset.name,
+              isSelected: _selectedPreset == preset,
               onSelected: (selected) {
                 if (selected) {
                   _selectPreset(preset);
                 }
               },
+              context: context,
             );
           }).toList(),
         ),
@@ -289,8 +282,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   }
 
   Widget _buildAppBlockerSection(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     final mockApps = [
       {'id': 'com.social.media', 'name': 'Social Media App'},
       {'id': 'com.video.streaming', 'name': 'Video Streaming'},
@@ -322,8 +313,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   }
 
   Widget _buildRecentSessionsSection(List focusSessions, BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -369,7 +358,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                           const SizedBox(height: 5),
                           Text(
                             '${session.startTime.hour}:${session.startTime.minute.toString().padLeft(2, '0')}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 12),
                           ),
                           const Spacer(),
                           if (session.isCompleted)
@@ -389,10 +379,12 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       ],
     );
   }
-  
+
   Widget _buildScreenTimeButton(BuildContext context) {
     return Center(
-      child: ElevatedButton(
+      child: AppButtons.primaryButton(
+        context: context,
+        text: 'View Screen Time',
         onPressed: () {
           Navigator.push(
             context,
@@ -401,7 +393,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
             ),
           );
         },
-        child: const Text('View Screen Time'),
       ),
     );
   }

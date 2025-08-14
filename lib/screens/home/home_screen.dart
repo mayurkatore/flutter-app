@@ -7,9 +7,9 @@ import '../journal/journal_screen.dart';
 import '../educational/educational_hub_screen.dart';
 import '../social/social_screen.dart';
 import '../goals/goal_setting_screen.dart';
-import '../../providers/theme_provider.dart';
 import '../../widgets/common/draggable_theme_toggle.dart';
 import '../settings/settings_screen.dart';
+import '../testing/testing_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +30,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const SocialScreen(),
     const GoalSettingScreen(),
     const SettingsScreen(),
+    const TestingScreen(),
   ];
 
   @override
@@ -81,6 +82,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
                 label: 'Settings',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.bug_report),
+                label: 'Testing',
               ),
             ],
           ),

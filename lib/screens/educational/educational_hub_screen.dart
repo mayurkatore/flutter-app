@@ -331,7 +331,7 @@ class EducationalHubScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 Chip(
                   label: Text('$questions questions'),
-                  backgroundColor: colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: colorScheme.primary.withAlpha(26),
                 ),
               ],
             ),

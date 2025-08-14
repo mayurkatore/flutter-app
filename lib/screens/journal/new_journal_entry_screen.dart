@@ -188,7 +188,7 @@ class _NewJournalEntryScreenState extends ConsumerState<NewJournalEntryScreen> {
                 children: _tags.map((tag) {
                   return Chip(
                     label: Text(tag),
-                    backgroundColor: colorScheme.primary.withOpacity(0.1),
+                    backgroundColor: colorScheme.primary.withAlpha(26),
                     onDeleted: () => _removeTag(tag),
                   );
                 }).toList(),

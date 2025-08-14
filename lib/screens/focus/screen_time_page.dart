@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/screen_time_service.dart';
-import '../../models/app_usage.dart';
+import '../../models/app_usage_info.dart';
 
 class ScreenTimePage extends ConsumerStatefulWidget {
   const ScreenTimePage({super.key});
@@ -11,8 +11,9 @@ class ScreenTimePage extends ConsumerStatefulWidget {
 }
 
 class _ScreenTimePageState extends ConsumerState<ScreenTimePage> {
+  final ScreenTimeService _screenTimeService = ScreenTimeService();
   String _totalTime = "Loading...";
-  List<AppUsage> _appsUsage = [];
+  List<AppUsageInfo> _appsUsage = [];
   bool _permissionRequested = false;
 
   @override
@@ -23,7 +24,7 @@ class _ScreenTimePageState extends ConsumerState<ScreenTimePage> {
 
   Future<void> _fetchUsage() async {
     // Check permission
-    bool granted = await ScreenTimeService.requestUsagePermission();
+    bool granted = await _screenTimeService.requestUsagePermission();
     if (!granted) {
       if (!_permissionRequested) {
         // Show a dialog explaining that permission is needed
@@ -40,14 +41,14 @@ class _ScreenTimePageState extends ConsumerState<ScreenTimePage> {
     _permissionRequested = false;
 
     // Get total screen time
-    Duration totalDuration = await ScreenTimeService.getTotalScreenTime();
-    String totalTime = ScreenTimeService.formatDuration(totalDuration);
+    Duration totalDuration = await _screenTimeService.getTotalScreenTime();
+    String totalTime = _screenTimeService.formatDuration(totalDuration);
 
     // Get app usage stats
-    List<AppUsage> usageStats = await ScreenTimeService.getDailyScreenTimeStats();
+    List<AppUsageInfo> usageStats = await _screenTimeService.getTodayAppUsage();
 
     // Sort by usage time (descending)
-    usageStats.sort((a, b) => b.todayUsage.compareTo(a.todayUsage));
+    usageStats.sort((a, b) => b.usage.compareTo(a.usage));
 
     setState(() {
       _totalTime = totalTime;
@@ -146,7 +147,7 @@ class _ScreenTimePageState extends ConsumerState<ScreenTimePage> {
                         Icon(
                           Icons.hourglass_empty,
                           size: 48,
-                          color: colorScheme.onSurface.withOpacity(0.6),
+                          color: colorScheme.onSurface.withAlpha(153),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -169,9 +170,9 @@ class _ScreenTimePageState extends ConsumerState<ScreenTimePage> {
                           child: ListTile(
                             title: Text(app.appName),
                             subtitle: Text(
-                              "Usage: ${ScreenTimeService.formatDuration(app.todayUsage)}",
+                              "Usage: ${_screenTimeService.formatDuration(app.usage)}",
                             ),
-                            trailing: app.isBlocked
+                            trailing: _screenTimeService.appLimits.containsKey(app.packageName)
                                 ? Icon(
                                     Icons.block,
                                     color: colorScheme.error,

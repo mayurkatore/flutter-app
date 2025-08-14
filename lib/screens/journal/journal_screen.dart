@@ -22,7 +22,8 @@ class JournalScreen extends ConsumerWidget {
               // Navigate to new journal entry screen
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NewJournalEntryScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const NewJournalEntryScreen()),
               );
             },
           ),
@@ -36,7 +37,7 @@ class JournalScreen extends ConsumerWidget {
             // Mood Tracker Section
             _buildMoodTracker(context),
             const SizedBox(height: 30),
-            
+
             // Recent Entries Section
             const Text(
               'Recent Entries',
@@ -51,15 +52,17 @@ class JournalScreen extends ConsumerWidget {
       ),
     );
   }
-  
-  void _deleteJournalEntry(String entryId, WidgetRef ref, BuildContext context) async {
+
+  void _deleteJournalEntry(
+      String entryId, WidgetRef ref, BuildContext context) async {
     // Show a confirmation dialog before deleting
     bool? confirmDelete = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Journal Entry'),
-          content: const Text('Are you sure you want to delete this journal entry? This action cannot be undone.'),
+          content: const Text(
+              'Are you sure you want to delete this journal entry? This action cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -73,22 +76,24 @@ class JournalScreen extends ConsumerWidget {
         );
       },
     );
-    
+
     // If user confirmed deletion, proceed with deleting the entry
     if (confirmDelete == true) {
       ref.read(journalProvider.notifier).removeJournalEntry(entryId);
-      
+
       // Show a confirmation message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Journal entry deleted')),
       );
     }
   }
-  
-  void _editJournalEntry(JournalEntry entry, WidgetRef ref, BuildContext context) async {
+
+  void _editJournalEntry(
+      JournalEntry entry, WidgetRef ref, BuildContext context) async {
     // Show a dialog with a text field to edit the response
-    TextEditingController controller = TextEditingController(text: entry.response);
-    
+    TextEditingController controller =
+        TextEditingController(text: entry.response);
+
     String? newResponse = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -115,11 +120,13 @@ class JournalScreen extends ConsumerWidget {
         );
       },
     );
-    
+
     // If user saved changes, update the entry
     if (newResponse != null && newResponse != entry.response) {
-      ref.read(journalProvider.notifier).updateJournalEntry(entry.id, newResponse);
-      
+      ref
+          .read(journalProvider.notifier)
+          .updateJournalEntry(entry.id, newResponse);
+
       // Show a confirmation message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Journal entry updated')),
@@ -129,7 +136,7 @@ class JournalScreen extends ConsumerWidget {
 
   Widget _buildMoodTracker(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -144,11 +151,16 @@ class JournalScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildMoodOption(Mood.veryHappy, Icons.sentiment_very_satisfied, 'Very Happy', context),
-                _buildMoodOption(Mood.happy, Icons.sentiment_satisfied, 'Happy', context),
-                _buildMoodOption(Mood.neutral, Icons.sentiment_neutral, 'Neutral', context),
-                _buildMoodOption(Mood.sad, Icons.sentiment_dissatisfied, 'Sad', context),
-                _buildMoodOption(Mood.verySad, Icons.sentiment_very_dissatisfied, 'Very Sad', context),
+                _buildMoodOption(Mood.veryHappy, Icons.sentiment_very_satisfied,
+                    'Very Happy', context),
+                _buildMoodOption(
+                    Mood.happy, Icons.sentiment_satisfied, 'Happy', context),
+                _buildMoodOption(
+                    Mood.neutral, Icons.sentiment_neutral, 'Neutral', context),
+                _buildMoodOption(
+                    Mood.sad, Icons.sentiment_dissatisfied, 'Sad', context),
+                _buildMoodOption(Mood.verySad,
+                    Icons.sentiment_very_dissatisfied, 'Very Sad', context),
               ],
             ),
           ],
@@ -157,9 +169,10 @@ class JournalScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMoodOption(Mood mood, IconData icon, String label, BuildContext context) {
+  Widget _buildMoodOption(
+      Mood mood, IconData icon, String label, BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Column(
       children: [
         IconButton(
@@ -192,7 +205,8 @@ class JournalScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildJournalEntriesList(List<JournalEntry> entries, BuildContext context, WidgetRef ref) {
+  Widget _buildJournalEntriesList(
+      List<JournalEntry> entries, BuildContext context, WidgetRef ref) {
     if (entries.isEmpty) {
       return const Center(
         child: Text('No journal entries yet. Create your first entry!'),
@@ -200,7 +214,8 @@ class JournalScreen extends ConsumerWidget {
     }
 
     // Sort by date (newest first)
-    final sortedEntries = List.from(entries)..sort((a, b) => b.date.compareTo(a.date));
+    final sortedEntries = List.from(entries)
+      ..sort((a, b) => b.date.compareTo(a.date));
 
     return ListView.builder(
       itemCount: sortedEntries.length,
@@ -211,9 +226,10 @@ class JournalScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildJournalEntryCard(JournalEntry entry, BuildContext context, WidgetRef ref) {
+  Widget _buildJournalEntryCard(
+      JournalEntry entry, BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -252,7 +268,8 @@ class JournalScreen extends ConsumerWidget {
             const SizedBox(height: 10),
             Text(
               entry.prompt,
-              style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+              style: const TextStyle(
+                  fontStyle: FontStyle.italic, color: Colors.grey),
             ),
             const SizedBox(height: 5),
             Text(entry.response),
@@ -262,7 +279,7 @@ class JournalScreen extends ConsumerWidget {
               children: entry.tags.map((tag) {
                 return Chip(
                   label: Text(tag),
-                  backgroundColor: colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: colorScheme.primary.withAlpha(26),
                 );
               }).toList(),
             ),

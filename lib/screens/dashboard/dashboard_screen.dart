@@ -6,6 +6,7 @@ import '../../providers/goal_provider.dart';
 import '../../models/app_usage.dart';
 import '../../models/goal.dart';
 import '../../services/permission_service.dart';
+import '../../widgets/shared/button_functions.dart';
 import '../settings/settings_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -15,17 +16,20 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appUsage = ref.watch(appUsageProvider);
     final goals = ref.watch(goalProvider);
-    final colorScheme = Theme.of(context).colorScheme;
 
     // Check for usage access permission
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       bool hasPermission = await PermissionService.checkUsageAccessPermission();
       if (!hasPermission) {
-        bool granted = await PermissionService.requestUsageAccessPermission(context);
-        if (!granted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Usage access permission is required for screen time tracking.')),
-          );
+        if (context.mounted) {
+          bool granted = await PermissionService.requestUsageAccessPermission(context);
+          if (!granted && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text(
+                      'Usage access permission is required for screen time tracking.')),
+            );
+          }
         }
       }
     });
@@ -34,8 +38,8 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.settings, color: colorScheme.onSurfaceVariant),
+          AppButtons.iconButton(
+            icon: Icons.settings,
             onPressed: () {
               // Navigate to settings screen
               Navigator.push(
@@ -45,6 +49,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               );
             },
+            context: context,
           ),
         ],
       ),
@@ -57,7 +62,7 @@ class DashboardScreen extends ConsumerWidget {
               // Daily Summary Card
               _buildDailySummaryCard(context, appUsage),
               const SizedBox(height: 20),
-              
+
               // Goals Section
               const Text(
                 'Your Goals',
@@ -66,7 +71,7 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 10),
               _buildGoalsList(goals, context),
               const SizedBox(height: 20),
-              
+
               // App Usage Section
               const Text(
                 'App Usage Today',
@@ -83,13 +88,13 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _buildDailySummaryCard(BuildContext context, List<AppUsage> appUsage) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     // Calculate total usage time
     Duration totalUsage = Duration.zero;
     for (var app in appUsage) {
       totalUsage += app.todayUsage;
     }
-    
+
     // Calculate average usage (assuming 8 hours awake time)
     double usagePercentage = (totalUsage.inMinutes / (8 * 60)).clamp(0.0, 1.0);
 
@@ -113,7 +118,8 @@ class DashboardScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              progressColor: usagePercentage > 0.7 ? Colors.red : colorScheme.primary,
+              progressColor:
+                  usagePercentage > 0.7 ? Colors.red : colorScheme.primary,
             ),
             const SizedBox(height: 10),
             Text(
@@ -128,7 +134,7 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _buildGoalsList(List<Goal> goals, BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     if (goals.isEmpty) {
       return const Card(
         child: Padding(
@@ -148,7 +154,8 @@ class DashboardScreen extends ConsumerWidget {
               children: [
                 Text(
                   goal.title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
                 Text('Reason: ${goal.reason}'),
@@ -156,7 +163,9 @@ class DashboardScreen extends ConsumerWidget {
                 LinearPercentIndicator(
                   percent: goal.progressPercentage,
                   lineHeight: 10.0,
-                  progressColor: goal.progressPercentage > 0.7 ? Colors.green : colorScheme.primary,
+                  progressColor: goal.progressPercentage > 0.7
+                      ? Colors.green
+                      : colorScheme.primary,
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -173,7 +182,7 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _buildAppUsageList(List<AppUsage> appUsage, BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     if (appUsage.isEmpty) {
       return const Card(
         child: Padding(
@@ -184,14 +193,16 @@ class DashboardScreen extends ConsumerWidget {
     }
 
     // Sort by usage time (highest first)
-    final sortedApps = List.from(appUsage)..sort((a, b) => b.todayUsage.compareTo(a.todayUsage));
+    final sortedApps = List.from(appUsage)
+      ..sort((a, b) => b.todayUsage.compareTo(a.todayUsage));
 
     return Column(
       children: sortedApps.map((app) {
-        final usagePercentage = app.dailyLimit.inMinutes > 0 
-            ? (app.todayUsage.inMinutes / app.dailyLimit.inMinutes).clamp(0.0, 1.0)
+        final usagePercentage = app.dailyLimit.inMinutes > 0
+            ? (app.todayUsage.inMinutes / app.dailyLimit.inMinutes)
+                .clamp(0.0, 1.0)
             : 0.0;
-            
+
         bool isOverLimit = usagePercentage >= 1.0;
 
         return Card(
@@ -205,7 +216,8 @@ class DashboardScreen extends ConsumerWidget {
                   children: [
                     Text(
                       app.appName,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     if (app.isBlocked)
                       const Chip(

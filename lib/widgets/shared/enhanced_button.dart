@@ -5,12 +5,10 @@ class EnhancedButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool isLoading;
   final IconData? icon;
-  final bool isPrimary;
   final double? width;
   final double? height;
   final Color? backgroundColor;
   final Color? textColor;
-  final bool isOutlined;
 
   const EnhancedButton({
     super.key,
@@ -18,36 +16,51 @@ class EnhancedButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.icon,
-    this.isPrimary = true,
     this.width,
     this.height,
     this.backgroundColor,
     this.textColor,
-    this.isOutlined = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final colorScheme = theme.colorScheme;
+
     return SizedBox(
       width: width,
       height: height ?? 48,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: backgroundColor ?? (isPrimary ? theme.colorScheme.primary : theme.colorScheme.secondary),
-          foregroundColor: textColor ?? (isPrimary ? theme.colorScheme.onPrimary : theme.colorScheme.onSecondary),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        style: ButtonStyle(
+          elevation: WidgetStateProperty.all(0),
+          backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colorScheme.onSurface.withAlpha(31);
+            }
+            return backgroundColor ?? colorScheme.primary;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colorScheme.onSurface.withAlpha(97);
+            }
+            return textColor ?? colorScheme.onPrimary;
+          }),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ).copyWith(
-          overlayColor: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
-                return (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.1);
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
+                return (textColor ?? colorScheme.onPrimary).withAlpha(31);
+              }
+              if (states.contains(WidgetState.hovered)) {
+                return (textColor ?? colorScheme.onPrimary).withAlpha(20);
               }
               return null;
             },
